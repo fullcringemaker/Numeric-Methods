@@ -24,35 +24,38 @@ def trapezoids_method(n):
     return h * s
 
 def simpsons_method(n):
-    if n % 2 != 0:
-        n += 1
     h = (b - a) / n
-    s = f(a) + f(b)
 
-    for i in range(1, n, 2):
-        s += 4.0 * f(a + i * h)
-    for i in range(2, n, 2):
-        s += 2.0 * f(a + i * h)
+    middle_sum = 0.0
+    for i in range(1, n + 1):
+        x_mid = a + (i - 0.5) * h
+        middle_sum += f(x_mid)
 
-    return (h / 3.0) * s
+    node_sum = 0.0
+    for i in range(1, n):
+        x_i = a + i * h
+        node_sum += f(x_i)
+
+    return (h / 6.0) * (f(a) + f(b) + 4.0 * middle_sum + 2.0 * node_sum)
 
 def richardson(I_h, I_h2, k):
-    return (I_h - I_h2) / (2**k - 1)
+    return (I_h2 - I_h) / (2**k - 1)
 
 def clarification_with_richardson(method_func, k, n_start=2):
     n = n_start
-    I_prev = method_func(n)
+    I_h = method_func(n)
 
     while True:
         n = n * 2
-        I_curr = method_func(n)
-        R = richardson(I_prev, I_curr, k)
-        I_refined = I_curr + R
+        I_h2 = method_func(n)
+
+        R = richardson(I_h, I_h2, k)
+        I_refined = I_h2 + R
 
         if abs(R) < eps:
-            return n, I_curr, R, I_refined
+            return n, I_h2, R, I_refined
 
-        I_prev = I_curr
+        I_h = I_h2
 
 print("Функция: f(x) = e^x")
 print(f"Промежуток: [{int(a)}, {int(b)}]")
@@ -60,6 +63,7 @@ print(f"Точность: eps = {eps}")
 print(f"Аналитическое значение: I = {I}\n")
 
 results = []
+
 n, I_star, R, I_ref = clarification_with_richardson(middle_rectangles_method, k=2, n_start=2)
 results.append(("Метод средних прямоугольников", n, I_star, R, I_ref, abs(I - I_ref)))
 
