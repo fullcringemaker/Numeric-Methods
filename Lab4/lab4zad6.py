@@ -1,0 +1,42 @@
+import math
+import numpy as np
+
+EPS = 0.01
+
+X0 = -0.20184
+Y0 = 0.51015
+
+def f(x, y):
+    return np.array([
+        math.sin(y + 1) - x - 1.2,
+        2 * y + math.cos(x) - 2
+    ], dtype=float)
+
+def jacobian(x, y):
+    return np.array([
+        [-1.0, math.cos(y + 1)],
+        [-math.sin(x), 2.0]
+    ], dtype=float)
+
+def newton(x0, y0, eps=EPS, max_iter=100):
+    x = x0
+    y = y0
+    for _ in range(max_iter):
+        delta = np.linalg.solve(jacobian(x, y), -f(x, y))
+        x_new = x + delta[0]
+        y_new = y + delta[1]
+        if max(abs(x_new - x), abs(y_new - y)) < eps:
+            return x_new, y_new
+        x, y = x_new, y_new
+    return x, y
+
+def main():
+    x, y = newton(X0, Y0)
+    print("Решение, полученное графически:")
+    print(f"x = {X0:.5f}, y = {Y0:.5f}")
+    print()
+    print("Решение методом Ньютона:")
+    print(f"x = {x:.10f}, y = {y:.10f}")
+
+if __name__ == "__main__":
+    main()
